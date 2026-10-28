@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BrandGuard AI | TEAMTITANS</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar"><div class="brandmark">BG</div><div><strong>BrandGuard AI</strong><small>TEAMTITANS · Brand governance workspace</small></div><span class="topnote">Human-reviewed content checks</span></header>
+<main class="container">
+<section class="hero"><div><p class="eyebrow">BEFORE YOU PUBLISH</p><h1>Keep your brand<br>message consistent.</h1><p class="intro">Check a draft against your team's approved wording and rules. Review every flag before making a decision.</p></div><div class="hero-card"><span class="bigcheck">✓</span><b>Review, don't auto-reject</b><p>Every result is a suggestion. Your team makes the final call.</p></div></section>
+{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-wrap">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+<div class="grid">
+<section class="panel wide"><div class="section-head"><div><p class="eyebrow">CONTENT CHECKER</p><h2>Check a draft</h2></div><span class="pill">Text MVP</span></div>
+<form action="{{ url_for('check') }}" method="post"><label for="draft">Paste your caption, email or promotional text</label><textarea id="draft" name="draft" rows="8" placeholder="Example: Our product is available everywhere. Try it today!" required></textarea><div class="form-foot"><span>Checks use the active rules listed on this page.</span><button type="submit" class="btn primary">Check content →</button></div></form></section>
+<section class="panel"><div class="section-head"><div><p class="eyebrow">TEAM GUIDELINES</p><h2>Active rules</h2></div><span class="count">{{ rules|selectattr('active')|list|length }}</span></div>
+<div class="rule-list">{% for rule in rules %}<article class="rule {% if not rule['active'] %}inactive{% endif %}"><div class="rule-top"><b>{{ rule['title'] }}</b><span class="tag">{{ rule['rule_type'].replace('_',' ') }}</span></div><p>{{ rule['explanation'] }}</p><code>{{ rule['phrase'] }}</code><form method="post" action="{{ url_for('toggle_rule', rule_id=rule['id']) }}"><button class="text-button" type="submit">{% if rule['active'] %}Deactivate{% else %}Activate{% endif %}</button></form></article>{% else %}<p>No rules yet.</p>{% endfor %}</div>
+<details class="add-rule"><summary>+ Add a brand rule</summary><form method="post" action="{{ url_for('add_rule') }}" class="stack"><label>Rule title<input name="title" required placeholder="e.g. Approved product name"></label><label>Explanation<textarea name="explanation" rows="2" required placeholder="Why does this rule matter?"></textarea></label><label>Phrase to check<input name="phrase" required placeholder="Text phrase"></label><label>Rule type<select name="rule_type"><option value="must_avoid">Must avoid phrase</option><option value="must_include">Must include phrase</option><option value="prefer">Preferred term (flag when found)</option></select></label><button class="btn secondary" type="submit">Save rule</button></form></details></section>
+<section class="panel wide"><div class="section-head"><div><p class="eyebrow">RECENT ACTIVITY</p><h2>Recent reviews</h2></div></div>
+{% if reviews %}<div class="review-list">{% for review in reviews %}<a class="review-row" href="{{ url_for('result', review_id=review['id']) }}"><div><b>{{ review['draft'][:78] }}{% if review['draft']|length > 78 %}…{% endif %}</b><small>{{ review['created_at'] }}</small></div><span class="status">{{ review['status'] }}</span></a>{% endfor %}</div>{% else %}<p class="muted">Your checked drafts will appear here.</p>{% endif %}</section>
+</div>
+<footer>Prototype for the Inkloom AI problem statement · Automated flags can be wrong or incomplete. Always review before publishing.</footer>
+</main></body></html>
